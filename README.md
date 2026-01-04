@@ -1,2 +1,2 @@
 # etherealbeautychatbot
-Chatbot for my beauty website
+Chatbot for beauty website
