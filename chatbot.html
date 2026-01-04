@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethereal Beauty Chatbot</title>
+    <style>
+        /* Chatbot Container */
+        #chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        
+        /* Chat Header */
+        .chat-header {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        /* Messages Area */
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f9f9f9;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        
+        .bot-message {
+            background: #e8f4f8;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .user-message {
+            background: #d4edda;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        
+        /* Input Area */
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #eee;
+            background: white;
+            border-radius: 0 0 15px 15px;
+        }
+        
+        #messageInput {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+        }
+        
+        #sendButton {
+            background: #ff9a9e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Chat Button */
+        #chatButton {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 154, 158, 0.3);
+            z-index: 999;
+        }
+        
+        #chatButton img {
+            width: 30px;
+            height: 30px;
+            filter: brightness(0) invert(1);
+        }
+        
+        /* Quick Replies */
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 10px;
+            border-top: 1px solid #eee;
+        }
+        
+        .quick-reply {
+            background: #f0f0f0;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .quick-reply:hover {
+            background: #e0e0e0;
+        }
+        
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #ccc;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+            40% { transform: translateY(-10px); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Chat Button -->
+    <div id="chatButton">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
+            <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+        </svg>
+    </div>
+    
+    <!-- Chatbot Container -->
+    <div id="chatbot-container">
+        <div class="chat-header">
+            <h3>Ethereal Beauty Assistant</h3>
+            <button class="close-btn">×</button>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages will appear here -->
+            <div class="message bot-message">
+                Hello! 👋 I'm your Ethereal Beauty assistant. How can I help you today?
+            </div>
+        </div>
+        
+        <div class="quick-replies" id="quickReplies">
+            <button class="quick-reply" data-msg="What are your best products?">Best Products</button>
+            <button class="quick-reply" data-msg="What discounts do you offer?">Discounts</button>
+            <button class="quick-reply" data-msg="How does shipping work?">Shipping Info</button>
+            <button class="quick-reply" data-msg="Do you have products for sensitive skin?">Sensitive Skin</button>
+        </div>
+        
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Type your message here...">
+            <button id="sendButton">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const chatButton = document.getElementById('chatButton');
+        const chatbotContainer = document.getElementById('chatbot-container');
+        const closeBtn = document.querySelector('.close-btn');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const chatMessages = document.getElementById('chatMessages');
+        const quickReplies = document.querySelectorAll('.quick-reply');
+        
+        // Toggle Chat Window
+        chatButton.addEventListener('click', () => {
+            chatbotContainer.style.display = 'flex';
+            chatButton.style.display = 'none';
+            messageInput.focus();
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            chatbotContainer.style.display = 'none';
+            chatButton.style.display = 'flex';
+        });
+        
+        // Send Message Function
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                // Add user message
+                addMessage(message, 'user');
+                messageInput.value = '';
+                
+                // Show typing indicator
+                showTypingIndicator();
+                
+                // Get bot response after delay
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    const response = getBotResponse(message);
+                    addMessage(response, 'bot');
+                }, 1000);
+            }
+        }
+        
+        // Send message on button click
+        sendButton.addEventListener('click', sendMessage);
+        
+        // Send message on Enter key
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Quick reply buttons
+        quickReplies.forEach(button => {
+            button.addEventListener('click', () => {
+                const message = button.getAttribute('data-msg');
+                messageInput.value = message;
+                sendMessage();
+            });
+        });
+        
+        // Add message to chat
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.textContent = text;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Show typing indicator
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Remove typing indicator
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+        
+        // Bot Response Logic
+        function getBotResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+            
+            // Product inquiries
+            if (message.includes('best') || message.includes('popular') || message.includes('recommend')) {
+                return "Our most popular products are:\n1. Better U Face Wash (₹150 wholesale)\n2. Sweet Bliss Sunscreen SPF 40 (₹80 wholesale)\n3. Himalaya Youth Eternity Kit (₹500 wholesale)\n4. Parachute Body Lotions\n\nWhich product category interests you?";
+            }
+            
+            // Price inquiries
+            if (message.includes('price') || message.includes('cost') || message.includes('how much')) {
+                return "We offer wholesale prices:\n- Face washes: ₹60-150\n- Creams: ₹80-140\n- Lotions: ₹70-120\n- Special kits: ₹500\n\nFree shipping on orders above ₹1000! Would you like specific product pricing?";
+            }
+            
+            // Discount inquiries
+            if (message.includes('discount') || message.includes('offer') || message.includes('deal')) {
+                return "Current offers:\n• Free shipping on orders above ₹1000\n• Free gift on orders above ₹1000\n• Ask about combo discounts\n• Wholesale prices already 50-70% off retail!";
+            }
+            
+            // Shipping inquiries
+            if (message.includes('shipping') || message.includes('delivery') || message.includes('ship')) {
+                return "Shipping Information:\n📦 Free shipping on orders above ₹1000\n🚚 Standard delivery: 3-5 business days\n📍 Currently serving India\n💳 Cash on delivery available";
+            }
+            
+            // Skin type inquiries
+            if (message.includes('sensitive') || message.includes('dry') || message.includes('oily') || message.includes('skin type')) {
+                return "For different skin types:\n• Sensitive: Boroplus Aloe Vera Gel\n• Dry: Activ Beaute Day Cream\n• Oily: St. Botanica Tea Tree Face Mask\n• All types: Parachute Body Lotions\nNeed specific recommendations?";
+            }
+            
+            // Order inquiries
+            if (message.includes('order') || message.includes('buy') || message.includes('purchase')) {
+                return "To order:\n1. Tell me which products you want\n2. I'll calculate the total\n3. You can contact via WhatsApp/phone\n4. We'll arrange delivery\n\nWhat would you like to order?";
+            }
+            
+            // Ingredients inquiries
+            if (message.includes('ingredient') || message.includes('natural') || message.includes('organic')) {
+                return "We prioritize natural ingredients:\n• Aloe Vera in multiple products\n• Coconut milk in Parachute lotions\n• SPF in sunscreens\n• Vitamin C in lightening creams\nAll products are dermatologically tested!";
+            }
+            
+            // Greetings
+            if (message.includes('hello') || message.includes('hi') || message.includes('hey')) {
+                return "Hello! Welcome to Ethereal Beauty! How can I assist you with our cosmetic products today?";
+            }
+            
+            // Default response
+            return "Thank you for your message! For detailed information about our products, pricing, or to place an order, please specify what you're looking for, or ask about:\n• Product recommendations\n• Pricing\n• Skin type advice\n• Shipping information";
+        }
+        
+        // Initialize with welcome message
+        window.addEventListener('load', () => {
+            // Optional: Auto-open after 10 seconds
+            // setTimeout(() => {
+            //     chatButton.click();
+            // }, 10000);
+        });
+    </script>
+</body>
+</html>
